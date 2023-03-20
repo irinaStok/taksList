@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { db } from './firebaseConnection';
-import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc } from 'firebase/firestore'
+import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
 
 import './app.css';
 
@@ -11,7 +11,32 @@ function App() {
   const [ responsavel, setResponsavel] = useState('');
   const [ idTask, setIdTask] = useState('');
   
+  const[email,setEmail] = useState('');
+  const[senha,setSenha] = useState('');
+
   const [ tarefas, setTarefas] = useState([]);
+
+useEffect(() =>{
+  async function loadPosts(){
+   const unsub = onSnapshot(collection(db, 'tarefas'), (snapshot) => {
+    let listaTask = [];
+
+    snapshot.forEach((doc)=>{
+      listaTask.push({
+        id: doc.id,
+        tarefa: doc.data().tarefa,
+        responsavel: doc.data().responsavel,
+  
+      })
+    })
+
+    setTarefas(listaTask)
+   })
+  
+  }
+  loadPosts();
+
+}, [])
 
   
 async function handleAdd(){
@@ -102,7 +127,7 @@ await updateDoc(docRef, {
   
 })
   
-
+/*
 async function apagarTask(){
   const docRef = doc(db, 'tarefas', idTask)  
   
@@ -112,18 +137,50 @@ async function apagarTask(){
     console.log('Deletado com sucesso')
 
    
-  })
-  .catch((error) => {
-    console.log('Something is whrong' + error)
-    
-  })
+  })*/
+  class Foo extends Component {
+    handleClick() {
+      console.log('Clicado');
+    }
+    render() {
+      return <button onClick={() => this.handleClick()}>Clique em mim!</button>;
+    }
+  }
 
-}
+
+
+
 }
   return (
     <div className="App">
       <h1> TO DO LIST</h1>
-     
+
+    <div className='container'> 
+
+    <h2>Usuario</h2>
+
+      <label> Email </label>
+      <input 
+      type='text'
+       placeholder='digite seu Email'
+       value={email}
+        onChange={(e)=> setEmail(e.target.value)}      
+      
+      /> <br/> 
+    <label> Senha </label>
+  
+    <input 
+      type='text'
+       placeholder='digite seua senha'
+       value={senha}
+        onChange={(e)=> setSenha(e.target.value)}      
+      
+      /> <br/> 
+
+                <button onClick={novoUser} >Login</button>
+    </div>
+    <br/> <br/>
+     <hr/>
       <div className='container'>
 
         <label> ID da Tarefa: </label>
@@ -153,7 +210,6 @@ async function apagarTask(){
       />
      <button onClick={handleAdd}>Cadastrar</button>
      <button onClick={buscarTarefa}>Buscar tarefa</button> <br/>
-
      <button onClick={editarTask}> Atualizar tarefa </button>
 
      <ul>
@@ -163,8 +219,7 @@ async function apagarTask(){
             <strong>ID: {post.id}</strong><br/>
             <span>Tarefa: {post.tarefa} </span><br/>
             <span>Responsavel: {post.responsavel} </span><br/>
-            <button onClick={ () => apagarTask(post.id) }>Excluir</button> <br/> <br/>
-            <br/>
+           <br/>
 
           </li>
         )
@@ -174,5 +229,5 @@ async function apagarTask(){
         </div>
   );
 }
-
+//<button onClick={ () => apagarTask(post.id) }>Excluir</button> <br/> <br/>
 export default App;
